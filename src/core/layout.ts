@@ -15,13 +15,22 @@ export interface ISection extends IStyle {
 }
 
 export interface IReportItem extends IStyle {
+  type: "none" | "text" | "image";
   x: number;
   y: number;
   width: number;
   height: number;
   name: string;
+}
+
+export interface ITextReportItem extends IReportItem {
+  type: "text";
   text: string;
   binding?: string;
+}
+
+export interface IImageReportItem extends IReportItem {
+  source: string;
 }
 
 export interface IStyle {

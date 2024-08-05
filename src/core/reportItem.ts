@@ -21,29 +21,15 @@ export interface ReportItemOptions {
   appendTo?: HTMLElement;
 }
 
-export default class ReportItem implements IDisposable {
+export default abstract class ReportItem implements IDisposable {
   public readonly element = document.createElement("div");
 
-  public readonly properties = new ReportItemProperties();
-  private readonly _styles: MultipleStyles;
+  public readonly properties!: ReportItemProperties;
+  protected _styles!: MultipleStyles;
 
   private readonly _changeEventEmitter = new EventEmitter<ChangeEventArgs>();
 
-  constructor(options: ReportItemOptions) {
-    if (options.appendTo) {
-      options.appendTo.appendChild(this.element);
-    }
-
-    this._styles = new MultipleStyles(...options.parentStyles, this.properties);
-
-    if (options.defaultProperties) {
-      this.loadLayout(options.defaultProperties);
-    }
-
-    this._init();
-  }
-
-  private _init() {
+  init() {
     this.element.tabIndex = 0;
 
     this.element.style.display = "inline-block";
@@ -62,12 +48,11 @@ export default class ReportItem implements IDisposable {
     this.refresh();
   }
 
-  refresh() {
+  protected refresh() {
     this.element.style.left = `${this.properties.x}px`;
     this.element.style.top = `${this.properties.y}px`;
     this.element.style.width = `${this.properties.width}px`;
     this.element.style.height = `${this.properties.height}px`;
-    this.element.innerText = this.properties.text;
 
     this.element.style.color = this._styles.getStyle("color", "")!;
     this.element.style.backgroundColor = this._styles.getStyle(
@@ -118,13 +103,18 @@ export default class ReportItem implements IDisposable {
 
   loadLayout(layout: Partial<LayoutReportItem>) {
     this.properties.beginUpdate();
+    this.applyLayout(layout);
+    this.properties.endUpdate();
+
+    this.refresh();
+  }
+
+  applyLayout(layout: Partial<LayoutReportItem>) {
     this.properties.x = layout.x ?? 0;
     this.properties.y = layout.y ?? 0;
     this.properties.width = layout.width ?? 0;
     this.properties.height = layout.height ?? 0;
     this.properties.name = layout.name ?? "";
-    this.properties.text = layout.text ?? "";
-    this.properties.binding = layout.binding || "";
     this.properties.color = layout.color;
     this.properties.backgroundColor = layout.backgroundColor;
     this.properties.textAlign = layout.textAlign as TextAlign;
@@ -134,20 +124,16 @@ export default class ReportItem implements IDisposable {
     this.properties.fontFamily = layout.fontFamily;
     this.properties.fontSize = layout.fontSize;
     this.properties.fontWeight = layout.fontWeight;
-    this.properties.endUpdate();
-
-    this.refresh();
   }
 
   toJSON(): LayoutReportItem {
     return {
+      type: "none",
       x: this.properties.x,
       y: this.properties.y,
       width: this.properties.width,
       height: this.properties.height,
       name: this.properties.name,
-      text: this.properties.text,
-      binding: this.properties.binding,
       color: this.properties.color,
       backgroundColor: this.properties.backgroundColor,
       textAlign: this.properties.textAlign,
