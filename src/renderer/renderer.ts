@@ -35,16 +35,19 @@ export default class Renderer {
     this.options.element.appendChild(this.headerSection.element);
 
     const contentProperty = this.options.layout.contentSection.binding;
+    const contentData = contentProperty ? this.options.data[contentProperty] : null;
 
-    this.options.data[contentProperty].forEach((data: any) => {
-      const contentSection = new Section(
-        this.options.layout.contentSection,
-        data,
-        [this.options.layout],
-      );
-      this.options.element.appendChild(contentSection.element);
-      this.options.element.appendChild(contentSection.elementSections);
-    });
+    if (Array.isArray(contentData)) {
+      contentData.forEach((data: any) => {
+        const contentSection = new Section(
+          this.options.layout.contentSection,
+          data,
+          [this.options.layout],
+        );
+        this.options.element.appendChild(contentSection.element);
+        this.options.element.appendChild(contentSection.elementSections);
+      });
+    }
 
     this.options.element.appendChild(this.footerSection.element);
   }
